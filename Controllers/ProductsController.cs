@@ -5,6 +5,9 @@ using System.Text.Json;
 
 namespace SimpleRestApi.Controllers
 {
+    /// <summary>
+    /// API controller for managing products
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
@@ -18,13 +21,28 @@ namespace SimpleRestApi.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Gets all products
+        /// </summary>
+        /// <returns>A collection of all products</returns>
+        /// <response code="200">Returns the list of products</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<Product>> GetAll()
         {
             return Ok(_productService.GetAll());
         }
 
+        /// <summary>
+        /// Gets a product by ID
+        /// </summary>
+        /// <param name="id">The ID of the product to retrieve</param>
+        /// <returns>The product with the specified ID</returns>
+        /// <response code="200">Returns the product with the specified ID</response>
+        /// <response code="404">If the product doesn't exist</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Product> GetById(int id)
         {
             var product = _productService.GetById(id);
@@ -34,14 +52,35 @@ namespace SimpleRestApi.Controllers
             return Ok(product);
         }
 
+        /// <summary>
+        /// Creates a new product
+        /// </summary>
+        /// <param name="product">The product to create</param>
+        /// <returns>The created product</returns>
+        /// <response code="201">Returns the newly created product</response>
+        /// <response code="400">If the product is invalid</response>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<Product> Create(Product product)
         {
             var newProduct = _productService.Create(product);
             return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct);
         }
 
+        /// <summary>
+        /// Updates an existing product
+        /// </summary>
+        /// <param name="id">The ID of the product to update</param>
+        /// <param name="rawData">The updated product data</param>
+        /// <returns>No content if successful</returns>
+        /// <response code="204">If the product was successfully updated</response>
+        /// <response code="404">If the product doesn't exist</response>
+        /// <response code="500">If there was an error updating the product</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Update(int id, [FromBody] object rawData)
         {
             try
@@ -92,7 +131,16 @@ namespace SimpleRestApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes a product
+        /// </summary>
+        /// <param name="id">The ID of the product to delete</param>
+        /// <returns>No content if successful</returns>
+        /// <response code="204">If the product was successfully deleted</response>
+        /// <response code="404">If the product doesn't exist</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(int id)
         {
             var result = _productService.Delete(id);
